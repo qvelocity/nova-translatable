@@ -93,7 +93,9 @@ export default {
                 data[locale.key] = value;
               }
             } else {
-              formData.append(key, value);
+              // Fix for when the field is coming from a relationship
+              let realFormData = formData.formData || formData;
+              realFormData.append(key, value);
             }
           }
         }
@@ -110,7 +112,7 @@ export default {
       const locales = this.locales;
       const errorAttributes = {};
       for (const locale of locales) {
-        errorAttributes[locale.key] = `${this.currentField.attribute}.${locale.key}`;
+        errorAttributes[locale.key] = `${this.currentField.validationKey}.${locale.key}`;
       }
       return errorAttributes;
     },
