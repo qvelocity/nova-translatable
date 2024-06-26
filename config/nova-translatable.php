@@ -11,7 +11,7 @@ return [
      *  - Keyed array (['en' => 'English])
      *  - Callable that returns a keyed array
      */
-    'locales' => ['en' => 'English'],
+    'locales' => ['en' => 'English' , 'es' => 'Spanish'],
 
 
     /**

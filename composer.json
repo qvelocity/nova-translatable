@@ -34,7 +34,9 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "tests"
+      "Tests\\": "tests",
+      "App\\": "app",
+      "Database\\Seeders\\": "database/seeders/"
     }
   },
   "extra": {
@@ -65,9 +67,11 @@
     }
   ],
   "require-dev": {
+    "laracasts/cypress": "^3.0",
     "laravel/pint": "^1.16",
     "orchestra/testbench": "^9.1",
     "pestphp/pest": "^2.34",
+    "pestphp/pest-plugin-faker": "^2.0",
     "pestphp/pest-plugin-laravel": "^2.4",
     "phpstan/phpstan-phpunit": "^1.4"
   }
