@@ -36,7 +36,8 @@
     "psr-4": {
       "Tests\\": "tests",
       "App\\": "app",
-      "Database\\Seeders\\": "database/seeders/"
+      "Database\\Seeders\\": "database/seeders/",
+      "Outl1ne\\NovaSimpleRepeatable\\SimpleRepeatable\\": "vendor/outl1ne/nova-simple-repeatable/src/SimpleRepeatable/"
     }
   },
   "extra": {
@@ -70,6 +71,7 @@
     "laracasts/cypress": "^3.0",
     "laravel/pint": "^1.16",
     "orchestra/testbench": "^9.1",
+    "outl1ne/nova-simple-repeatable": "^2.2",
     "pestphp/pest": "^2.34",
     "pestphp/pest-plugin-faker": "^2.0",
     "pestphp/pest-plugin-laravel": "^2.4",

@@ -11,8 +11,6 @@ trait HandlesTranslatable
     /**
      * Override the default formatRules methods to add the translatable rulesFor functionality.
      *
-     * @param \Laravel\Nova\Http\Requests\NovaRequest $request
-     * @param array $rules
      *
      * @return array
      */
@@ -29,7 +27,9 @@ trait HandlesTranslatable
             foreach ($attributeRules['translatable'] as $locale => $localeRules) {
                 $newRuleAttribute = $attribute;
                 $pos = strrpos($attribute, '.*');
-                if ($pos !== false) $newRuleAttribute = substr_replace($attribute, '', $pos, strlen('.*'));
+                if ($pos !== false) {
+                    $newRuleAttribute = substr_replace($attribute, '', $pos, strlen('.*'));
+                }
                 $newRuleAtrribute = "{$newRuleAttribute}.{$locale}";
 
                 // We copy the locale rule into the rules array
@@ -75,6 +75,7 @@ trait HandlesTranslatable
     {
         // Get rules before $request->all() call
         $rules = static::rulesForCreation($request);
+
         return Validator::make($request->all(), $rules)
             ->after(function ($validator) use ($request) {
                 static::afterValidation($request, $validator);
@@ -86,6 +87,7 @@ trait HandlesTranslatable
     {
         // Get rules before $request->all() call
         $rules = static::rulesForUpdate($request, $resource);
+
         return Validator::make($request->all(), $rules)
             ->after(function ($validator) use ($request) {
                 static::afterValidation($request, $validator);

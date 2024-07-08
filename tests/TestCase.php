@@ -26,13 +26,12 @@ class TestCase extends Orchestra
         $app['config']->set('nova-translatable.locales', ['en' => 'English']);
         $app['config']->set('nova-translatable.prioritize_nova_locale', false);
 
-
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
         $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
 
     }

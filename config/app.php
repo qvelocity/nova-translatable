@@ -1,10 +1,6 @@
 <?php
 
-declare(strict_types = 1);
-
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Str;
+declare(strict_types=1);
 
 return [
 
@@ -167,9 +163,9 @@ return [
         // Test Application Service Providers...
         App\Providers\NovaServiceProvider::class,
         Laracasts\Cypress\CypressServiceProvider::class,
+        \Outl1ne\NovaSimpleRepeatable\SimpleRepeatableServiceProvider::class,
 
         // Field Service Providers...
-
         \Outl1ne\NovaTranslatable\FieldServiceProvider::class,
 
     ],

@@ -19,24 +19,26 @@ class LocaleSelect extends Field
 
         $this->translatableMeta = [
             'locales' => FieldServiceProvider::getLocales(),
-            'display_type' => config('nova-translatable.locale_select_display_type')
+            'display_type' => config('nova-translatable.locale_select_display_type'),
         ];
 
         return $this->setTranslatableMeta();
     }
 
     /**
-     * @param array|callable $locales
+     * @param  array|callable  $locales
      */
     public function setLocales($locales): self
     {
         $this->translatableMeta['locales'] = FieldServiceProvider::getLocales($locales);
+
         return $this->setTranslatableMeta();
     }
 
     public function setDisplayType(string $type): self
     {
         $this->translatableMeta['display_type'] = $type;
+
         return $this->setTranslatableMeta();
     }
 
