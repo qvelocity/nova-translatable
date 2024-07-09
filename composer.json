@@ -70,7 +70,7 @@
   "require-dev": {
     "laracasts/cypress": "^3.0",
     "laravel/pint": "^1.16",
-    "orchestra/testbench": "^9.1",
+    "orchestra/testbench": "^8.0|^9.0",
     "outl1ne/nova-simple-repeatable": "^2.2",
     "pestphp/pest": "^2.34",
     "pestphp/pest-plugin-faker": "^2.0",
