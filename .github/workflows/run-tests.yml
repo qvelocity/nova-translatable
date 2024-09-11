@@ -29,6 +29,9 @@ jobs:
             extensions: curl, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, iconv
             coverage: none
 
+      - name: Set Nova credentials
+        run: echo '${{ secrets.NOVA_LICENSE_KEY }}' > auth.json
+
       -   name: Install dependencies
           run: |
             composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
