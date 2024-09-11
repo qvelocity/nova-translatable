@@ -32,6 +32,14 @@
       "Outl1ne\\NovaTranslatable\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests",
+      "App\\": "app",
+      "Database\\Seeders\\": "database/seeders/",
+      "Outl1ne\\NovaSimpleRepeatable\\SimpleRepeatable\\": "vendor/outl1ne/nova-simple-repeatable/src/SimpleRepeatable/"
+    }
+  },
   "extra": {
     "laravel": {
       "providers": [
@@ -39,8 +47,17 @@
       ]
     }
   },
+  "scripts": {
+    "analyse": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "format": "vendor/bin/pint"
+  },
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -49,5 +66,15 @@
       "type": "composer",
       "url": "https://nova.laravel.com"
     }
-  ]
+  ],
+  "require-dev": {
+    "laracasts/cypress": "^3.0",
+    "laravel/pint": "^1.16",
+    "orchestra/testbench": "^8.0|^9.0",
+    "outl1ne/nova-simple-repeatable": "^2.2",
+    "pestphp/pest": "^2.34",
+    "pestphp/pest-plugin-faker": "^2.0",
+    "pestphp/pest-plugin-laravel": "^2.4",
+    "phpstan/phpstan-phpunit": "^1.4"
+  }
 }

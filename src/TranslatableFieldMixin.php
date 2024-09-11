@@ -3,6 +3,10 @@
 namespace Outl1ne\NovaTranslatable;
 
 use Exception;
+use Illuminate\Support\Arr;
+use Laravel\Nova\Fields\Markdown;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -19,7 +23,9 @@ class TranslatableFieldMixin
 
             $originalResolveCallback = $this->resolveCallback;
             $this->resolveUsing(function ($value, $resource, $attribute) use ($locales, $component, $originalResolveCallback, $options) {
-                if ($originalResolveCallback) $this->resolveCallback = $originalResolveCallback;
+                if ($originalResolveCallback) {
+                    $this->resolveCallback = $originalResolveCallback;
+                }
                 $attribute = FieldServiceProvider::normalizeAttribute($attribute);
 
                 // Load value from either the model or from the given $value
@@ -38,20 +44,22 @@ class TranslatableFieldMixin
                 }
 
                 try {
-                    if (!is_array($value)) {
+                    if (! is_array($value)) {
                         if (is_object($value)) {
                             $value = (array) $value;
                         } else {
                             $testValue = json_decode($value, true);
-                            if (is_array($testValue)) $value = $testValue;
+                            if (is_array($testValue)) {
+                                $value = $testValue;
+                            }
                         }
                     }
                 } catch (Exception $e) {
                 }
 
-                if (!empty($value)) {
+                if (! empty($value)) {
                     $value = array_map(function ($val) {
-                        return !is_numeric($val) || (is_string($val) && $val[0] === '0') ? $val : (float) $val;
+                        return ! is_numeric($val) || (is_string($val) && ($val[0] === '0' || $val[0] === '+')) ? $val : (float) $val;
                     }, (array) $value);
                 }
 
@@ -71,26 +79,38 @@ class TranslatableFieldMixin
                     ? $options['fillOtherLocalesFrom']
                     : config('nova-translatable.fill_other_locales_from', null);
 
-                $this->withMeta([
-                    'translatable' => [
-                        'original_attribute' => $this->attribute,
-                        'original_component' => $component,
-                        'locales' => $locales,
-                        'value' => $value ?: $defaultValue,
-                        'prioritize_nova_locale' => $prioritizeNovaLocale,
-                        'display_type' => $displayType,
-                    ],
-                ]);
+                if ($this instanceof Text && ! $this instanceof Number) {
+                    foreach ($value as $key => $val) {
+                        $value[$key] = ($val === null ? null : (string) $val);
+                    }
+                }
+
+                $translatable = [
+                    'original_attribute' => $this->attribute,
+                    'original_component' => $component,
+                    'locales' => $locales,
+                    'value' => $value ?: $defaultValue,
+                    'prioritize_nova_locale' => $prioritizeNovaLocale,
+                    'display_type' => $displayType,
+                ];
+
+                if ($this instanceof Markdown) {
+                    $translatable['previewFor'] = $translatable['value'] ? Arr::map($translatable['value'], fn ($value) => $this->previewFor($value)) : [];
+                }
+
+                $this->withMeta(['translatable' => $translatable]);
 
                 $this->component = 'translatable-field';
 
                 // If it's a CREATE or UPDATE request, we need to trick the validator a bit
                 $hasValidationTrick = property_exists($this, '__validationTrick') && $this->__validationTrick;
-                if (in_array(request()->method(), ['PUT', 'POST']) && !$hasValidationTrick) {
+                if (in_array(request()->method(), ['PUT', 'POST']) && ! $hasValidationTrick) {
                     $translations = $request->{$this->attribute};
-                    if (!empty($fillOtherLocalesFrom) && !empty($translations[$fillOtherLocalesFrom])) {
+                    if (! empty($fillOtherLocalesFrom) && ! empty($translations[$fillOtherLocalesFrom])) {
                         foreach ($locales as $localeKey => $localeName) {
-                            if (empty($translations[$localeKey])) $translations[$localeKey] = $translations[$fillOtherLocalesFrom];
+                            if (empty($translations[$localeKey])) {
+                                $translations[$localeKey] = $translations[$fillOtherLocalesFrom];
+                            }
                         }
                     }
                     $request->merge([$this->attribute => $translations]);
@@ -99,7 +119,9 @@ class TranslatableFieldMixin
                     $this->__validationTrick = true;
                 }
 
-                if ($originalResolveCallback) return $this->resolve($resource, $attribute);
+                if ($originalResolveCallback) {
+                    return $this->resolve($resource, $attribute);
+                }
             });
 
             $originalDisplayCallback = $this->displayCallback;
@@ -114,15 +136,19 @@ class TranslatableFieldMixin
                     $this->displayCallback = null;
                     parent::resolveForDisplay($resource, $attribute);
 
-                    if (is_string($value)) return $value;
+                    if (is_string($value)) {
+                        return $value;
+                    }
+
                     return collect(array_values((array) ($value ?? [])))->filter()->first() ?? '';
                 }
 
                 $this->resolveForDisplay($resource, $attribute);
+
                 return $value;
             });
 
-            $this->fillUsing(function ($request, $model, $attribute, $requestAttribute) use ($locales) {
+            $this->fillUsing(function ($request, $model, $attribute, $requestAttribute) {
                 $realAttribute = FieldServiceProvider::normalizeAttribute($this->meta['translatable']['original_attribute'] ?? $attribute);
                 $value = $request->{$realAttribute};
                 $translations = is_string($value) ? json_decode($value, true) : $value;
@@ -143,25 +169,34 @@ class TranslatableFieldMixin
     {
         return function ($locales, $rules) {
             $setRule = function ($locale, $rules) {
-                if (!in_array($locale, array_keys(FieldServiceProvider::getLocales()))) {
+                if (! in_array($locale, array_keys(FieldServiceProvider::getLocales()))) {
                     throw new Exception("Invalid locale specified ({$locale})");
                 }
 
-                if (!is_array($rules)) $rules = [$rules];
+                if (! is_array($rules)) {
+                    $rules = [$rules];
+                }
 
                 $this->rules['translatable'][$locale] = $rules;
+
                 return $this;
             };
 
-            if (is_callable($locales)) $locales = call_user_func($locales);
+            if (is_callable($locales)) {
+                $locales = call_user_func($locales);
+            }
 
             // Array of locales or callable rules
             if (is_array($locales) || is_callable($rules)) {
                 // Single locale with callable rules
-                if (!is_array($locales)) return $setRule($locales, call_user_func($rules, $locales));
+                if (! is_array($locales)) {
+                    return $setRule($locales, call_user_func($rules, $locales));
+                }
                 foreach ($locales as $locale) {
                     $_rules = $rules;
-                    if (is_callable($_rules)) $_rules = call_user_func($rules, $locale);
+                    if (is_callable($_rules)) {
+                        $_rules = call_user_func($rules, $locale);
+                    }
                     $setRule($locale, $_rules);
                 }
 
@@ -169,6 +204,7 @@ class TranslatableFieldMixin
             }
 
             $setRule($locales, $rules);
+
             return $this;
         };
     }

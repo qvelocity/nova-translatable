@@ -1,0 +1,89 @@
+name: run-tests
+
+on: [push, pull_request]
+
+jobs:
+  php_unit:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.1]
+        laravel: [10.*]
+        dependency-version: [ prefer-stable]
+        include:
+          -   laravel: 10.*
+              testbench: 8.*
+
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
+
+    steps:
+      -   name: Checkout code
+          uses: actions/checkout@v4
+
+      -   name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: ${{ matrix.php }}
+            extensions: curl, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, iconv
+            coverage: none
+
+      - name: Set Nova credentials
+        run: echo '${{ secrets.NOVA_LICENSE_KEY }}' > auth.json
+
+      -   name: Install dependencies
+          run: |
+            composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+            composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+
+      -   name: Setup Problem Matches
+          run: |
+            echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+            echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      -   name: Execute tests
+          run: vendor/bin/pest
+
+  cypress:
+    needs: php_unit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        php: [ 8.2]
+        laravel: [ 10.* ]
+        dependency-version: [ prefer-lowest, prefer-stable ]
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+    steps:
+     - name: Directory Permissions
+       run: sudo chmod -R 777 storage bootstrap/cache
+
+     - name: Setup Node.js
+       uses: actions/setup-node@v2
+       with:
+          node-version: '16.x'
+
+     - name: Cache NPM dependencies
+       id: cache
+       uses: actions/cache@v2
+       with:
+          path: ./node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('package-lock.json') }}
+
+     - name: Install dependencies
+       if: steps.cache.outputs.cache-hit != 'true'
+       run: npm i -g npm@8.5.5 && npm ci --ignore-scripts
+
+     - name: NPM Build Assets
+       run: npm run prod
+
+     - name: Checkout
+       uses: actions/checkout@v4
+    # Install npm dependencies, cache them correctly
+    # and run all Cypress tests
+     - name: Cypress run
+       uses: cypress-io/github-action@v6

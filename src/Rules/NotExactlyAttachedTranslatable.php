@@ -35,6 +35,7 @@ class NotExactlyAttachedTranslatable extends NotExactlyAttached
                             $ruleAttribute = "{$realAttribute}->{$locale}";
                             $query->wherePivot($ruleAttribute, $value);
                         }
+
                         return $query;
                     }
                 }
@@ -42,7 +43,7 @@ class NotExactlyAttachedTranslatable extends NotExactlyAttached
                 $query->wherePivot($field->attribute, $this->request->input($field->attribute));
             });
 
-        return !in_array(
+        return ! in_array(
             $this->request->input($this->request->relatedResource),
             $query->pluck($relatedModel->getQualifiedKeyName())->all()
         );
